@@ -57,6 +57,8 @@
         return results[1] || 0;
     };
 
+
+
     function getLikeCount(accessToken) {
         FB.api(
                 '/' + $.urlParam('id'),
@@ -67,6 +69,8 @@
                     $('#photosLink').append($('<a>').text(response.link).attr({'href': response.link, 'target': '_blank'}));
 
                     $.each(response.photos.data, function (index) {
+                        var downloadSpan = $('<span>').addClass('glyphicon glyphicon-download-alt').attr('aria-hidden', 'true');
+
                         var name = this.name;
                         var count = this.likes.summary.total_count;
                         var linkStr = this.link;
@@ -77,7 +81,10 @@
                                         $('<td>').text(index + 1).addClass("text-center"),
                                         $('<td>').text(name.split("\n")[2]).addClass("text-center"),
                                         $('<td>').append($('<a>').text(linkStr).attr({'href': this.link, 'target': '_blank'})),
-                                        $('<td>').text(count).addClass("text-right")
+                                        $('<td>').text(count).addClass("text-right"),
+                                        $('<td>').addClass('text-center').append(
+                                            $('<a>').addClass("btn btn-primary").text(' 名單').prepend(downloadSpan)
+                                        )
                                 )
                         );
                     });
@@ -135,8 +142,9 @@
             <tr>
                 <th class="col-md-1 text-center">#</th>
                 <th class="col-md-4 text-center">系所</th>
-                <th class="col-md-5">連結</th>
+                <th class="col-md-4">連結</th>
                 <th class="col-md-2 text-center">讚數</th>
+                <th class="col-md-1 text-center"></th>
             <tr>
             </thead>
             <tbody id="data">
