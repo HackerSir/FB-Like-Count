@@ -69,11 +69,14 @@
                     $.each(response.photos.data, function (index) {
                         var name = this.name;
                         var count = this.likes.summary.total_count;
+                        var linkStr = this.link;
+                        if (linkStr.length > 50) linkStr = linkStr.substr(0, 50) + "...";
+
                         $('#data').append(
                                 $('<tr>').append(
                                         $('<td>').text(index + 1).addClass("text-center"),
                                         $('<td>').text(name.split("\n")[2]).addClass("text-center"),
-                                        $('<td>').append($('<a>').text(this.link).attr({'href': this.link, 'target': '_blank'})),
+                                        $('<td>').append($('<a>').text(linkStr).attr({'href': this.link, 'target': '_blank'})),
                                         $('<td>').text(count).addClass("text-right")
                                 )
                         );
