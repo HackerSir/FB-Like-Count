@@ -1,0 +1,153 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>FB Like</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="sticky-footer.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="../js/analyticstracking.js"></script>
+</head>
+<body>
+<script>
+    window.fbAsyncInit = function () {
+        FB.init({
+            appId: '613333655472629',
+            xfbml: true,
+            version: 'v2.5'
+        });
+
+        FB.getLoginStatus(function (response) {
+            var accessToken = "";
+
+            if (response.status === 'connected') {
+                //console.log('Logged in.');
+                accessToken = response.authResponse.accessToken;
+                getLikeCount(accessToken);
+            }
+            else {
+                console.log('initiate FB login...');
+                FB.login(function (response) {
+                    if (response.authResponse) {
+                        accessToken = response.authResponse.accessToken;
+                        getLikeCount(accessToken);
+                    }
+                });
+            }
+        });
+    };
+
+    (function (d, s, id) {
+        var js, fjs = d.getElementsByTagName(s)[0];
+        if (d.getElementById(id)) {
+            return;
+        }
+        js = d.createElement(s);
+        js.id = id;
+        js.src = "https://connect.facebook.net/en_US/sdk.js";
+        fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+</script>
+<script>
+    //http://stackoverflow.com/a/25359264/4983032
+    $.urlParam = function (name) {
+        var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+        return results[1] || 0;
+    };
+
+    function getLikeCount(accessToken) {
+        FB.api(
+                '/' + $.urlParam('id'),
+                'GET',
+                {"fields": "photos.limit(100){likes.limit(0).summary(true),name,link},link,name"},
+                function (response) {
+                    $('#photosName').text(response.name);
+                    $('#photosLink').append($('<a>').text(response.link).attr({'href': response.link, 'target': '_blank'}));
+
+                    $.each(response.photos.data, function (index) {
+                        var name = this.name;
+                        var count = this.likes.summary.total_count;
+                        $('#data').append(
+                                $('<tr>').append(
+                                        $('<td>').text(index + 1).addClass("text-center"),
+                                        $('<td>').text(name.split("\n")[2]).addClass("text-center"),
+                                        $('<td>').append($('<a>').text(this.link).attr({'href': this.link, 'target': '_blank'})),
+                                        $('<td>').text(count).addClass("text-right")
+                                )
+                        );
+                    });
+                }
+        );
+
+        var now = new Date();
+        $('#time').text(
+                now.getFullYear() + '/' + (now.getMonth() + 1) + '/' + now.getDate() + ' ' +
+                now.getHours() + ':' + now.getMinutes()
+        );
+    }
+
+    function go() {
+        var id = $('#photosId').val();
+        window.location.assign('http://' + window.location.host + window.location.pathname + '?id=' + id);
+    }
+</script>
+<div class="container" style="margin-bottom: 10px;">
+    <h1>相簿讚數列表</h1>
+
+    <h2 id="time"></h2>
+
+    <div class="form-inline">
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder="Photos Id" id="photosId">
+        </div>
+        <button onclick="go();" class="btn btn-default">GO</button>
+    </div>
+
+    <div class="panel panel-default" style="margin-top: 10px;">
+        <div class="panel-heading">相簿資訊</div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <table class="table table-hover">
+                        <tr>
+                            <td class="col-md-2">名稱：</td>
+                            <td id="photosName"></td>
+                        </tr>
+                        <tr>
+                            <td class="col-md-2">連結：</td>
+                            <td id="photosLink"></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" style="margin-right: 0; margin-left: 0;">
+        <table class="table">
+            <thead>
+            <tr>
+                <th class="col-md-1 text-center">#</th>
+                <th class="col-md-4 text-center">系所</th>
+                <th class="col-md-5">連結</th>
+                <th class="col-md-2 text-center">讚數</th>
+            <tr>
+            </thead>
+            <tbody id="data">
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="container">
+        <p class="text-muted">
+            Powered by <a href="https://hackersir.org" target="_blank">逢甲大學黑客社</a>
+        </p>
+    </div>
+</footer>
+</body>
+</html>
