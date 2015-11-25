@@ -9,6 +9,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
     <script src="../js/analyticstracking.js"></script>
+    <script src="FileSaver.min.js"></script>
 </head>
 <body>
 <script>
@@ -57,18 +58,20 @@
         return results[1] || 0;
     };
 
-
+    LastResponse = null;
 
     function getLikeCount(accessToken) {
         FB.api(
                 '/' + $.urlParam('id'),
                 'GET',
-                {"fields": "photos.limit(100){likes.limit(0).summary(true),name,link},link,name"},
+                {"fields": "photos.limit(100){likes.limit(100).summary(true),name,link},link,name"},
                 function (response) {
                     if (response.error != undefined) {
                         alert(response.error.message);
                         return;
                     }
+
+                    LastResponse = response;
 
                     $('#photosName').text(response.name);
                     $('#photosLink').append($('<a>').text(response.link).attr({'href': response.link, 'target': '_blank'}));
@@ -76,7 +79,7 @@
                     $.each(response.photos.data, function (index) {
                         var downloadSpan = $('<span>').addClass('glyphicon glyphicon-download-alt').attr('aria-hidden', 'true');
 
-                        var name = this.name;
+                        var name = this.name.split("\n")[2];
                         var count = this.likes.summary.total_count;
                         var linkStr = this.link;
                         if (linkStr.length > 50) linkStr = linkStr.substr(0, 50) + "...";
@@ -84,11 +87,12 @@
                         $('#data').append(
                                 $('<tr>').append(
                                         $('<td>').text(index + 1).addClass("text-center"),
-                                        $('<td>').text(name.split("\n")[2]).addClass("text-center"),
+                                        $('<td>').text(name).addClass("text-center"),
                                         $('<td>').append($('<a>').text(linkStr).attr({'href': this.link, 'target': '_blank'})),
                                         $('<td>').text(count).addClass("text-right"),
                                         $('<td>').addClass('text-center').append(
-                                            $('<a>').addClass("btn btn-primary").text(' 名單').prepend(downloadSpan)
+                                                $('<a>').addClass("btn btn-primary").text(' 名單').prepend(downloadSpan)
+                                                        .on('click', function() { getLikeList(index, name); })
                                         )
                                 )
                         );
@@ -109,6 +113,35 @@
     function go() {
         var id = $('#photosId').val();
         window.location.assign('http://' + window.location.host + window.location.pathname + '?id=' + id);
+    }
+
+    function getLikeList(index, name) {
+        var photo = LastResponse.photos.data[index];
+
+        var likeList = photo.likes.data;
+        var nextLink = photo.likes.paging.next;
+
+        nestGetList(name, likeList, nextLink);
+    }
+
+    function nestGetList(name, likeList, nextLink) {
+        if (nextLink == undefined) {
+            saveText(name, likeList);
+        }
+        $.getJSON(nextLink, function (response) {
+            likeList.push.apply(likeList, response.data);
+            nestGetList(name, likeList, response.paging.next);
+        });
+    }
+
+    function saveText(name, likeList) {
+        var text = [];
+        $.each(likeList, function () {
+            text = text.concat(this.id + "\t" + this.name + "\r\n");
+        });
+
+        var blob = new Blob(text, {type: "text/plain;charset=utf-8"});
+        saveAs(blob, name + ".txt");
     }
 </script>
 <div class="container" style="margin-bottom: 10px;">
