@@ -65,6 +65,11 @@
                 'GET',
                 {"fields": "photos.limit(100){likes.limit(0).summary(true),name,link},link,name"},
                 function (response) {
+                    if (response.error != undefined) {
+                        alert(response.error.message);
+                        return;
+                    }
+
                     $('#photosName').text(response.name);
                     $('#photosLink').append($('<a>').text(response.link).attr({'href': response.link, 'target': '_blank'}));
 
