@@ -136,6 +136,7 @@
     function nestGetList(likeList, link, callback) {
         if (link == undefined && callback != undefined) {
             callback(likeList);
+            return;
         }
         $.getJSON(link, function (response) {
             likeList.push.apply(likeList, response.data);
