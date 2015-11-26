@@ -78,7 +78,8 @@
                     $('#photosLink').append($('<a>').text(response.link).attr({'href': response.link, 'target': '_blank'}));
 
                     $.each(response.photos.data, function (index) {
-                        var downloadSpan = $('<span>').addClass('glyphicon glyphicon-download-alt').attr('aria-hidden', 'true');
+                        var $downloadSpan = $('<span>').addClass('glyphicon glyphicon-download-alt').attr('aria-hidden', 'true');
+                        var $loadSpan = $('<span>').addClass('fa fa-spinner fa-spin');
 
                         var name = this.name.split("\n")[2];
                         var count = this.likes.summary.total_count;
@@ -94,9 +95,10 @@
                                         $('<td>').append($('<a>').text(linkStr).attr({'href': this.link, 'target': '_blank'})),
                                         $('<td>').text(count).addClass("text-right"),
                                         $('<td>').addClass('text-center').append(
-                                                $('<a>').addClass("btn btn-primary").text(' 名單').prepend(downloadSpan)
+                                                $('<a>').addClass("btn btn-primary").text(' 名單').prepend($downloadSpan)
                                                         .on('click', function () {
-                                                            getLikeList(index, filename);
+                                                            $(this).append($loadSpan);
+                                                            getLikeList(index, filename, $(this));
                                                         })
                                         )
                                 )
@@ -120,30 +122,32 @@
         window.location.assign('http://' + window.location.host + window.location.pathname + '?id=' + id);
     }
 
-    function getLikeList(index, name) {
+    function getLikeList(index, name, btn) {
         var photo = LastResponse.photos.data[index];
 
         var likeList = photo.likes.data;
         var nextLink = photo.likes.paging.next;
 
-        nestGetList(name, likeList, nextLink);
+        nestGetList(name, likeList, nextLink, btn);
     }
 
-    function nestGetList(name, likeList, nextLink) {
+    function nestGetList(name, likeList, nextLink, btn) {
         if (nextLink == undefined) {
-            saveText(name, likeList);
+            saveText(name, likeList, btn);
         }
         $.getJSON(nextLink, function (response) {
             likeList.push.apply(likeList, response.data);
-            nestGetList(name, likeList, response.paging.next);
+            nestGetList(name, likeList, response.paging.next, btn);
         });
     }
 
-    function saveText(name, likeList) {
+    function saveText(name, likeList, btn) {
         var text = [];
         $.each(likeList, function () {
             text = text.concat(this.id + "\t" + this.name + "\r\n");
         });
+
+        $(btn).children(':last').remove();
 
         var blob = new Blob(text, {type: "text/plain;charset=utf-8"});
         saveAs(blob, name + ".txt");
