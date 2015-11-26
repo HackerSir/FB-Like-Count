@@ -133,11 +133,11 @@
         nestGetList(likeList, nextLink, callback);
     }
 
-    function nestGetList(likeList, nextLink, callback) {
-        if (nextLink == undefined && callback != undefined) {
+    function nestGetList(likeList, link, callback) {
+        if (link == undefined && callback != undefined) {
             callback(likeList);
         }
-        $.getJSON(nextLink, function (response) {
+        $.getJSON(link, function (response) {
             likeList.push.apply(likeList, response.data);
             nestGetList(likeList, response.paging.next, callback);
         });
