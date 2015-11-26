@@ -98,7 +98,9 @@
                                                 $('<a>').addClass("btn btn-primary").text(' 名單').prepend($downloadSpan)
                                                         .on('click', function () {
                                                             $(this).append($loadSpan);
-                                                            getLikeList(index, filename, $(this));
+                                                            getLikeList(index, function(likeList) {
+                                                                saveText(likeList, filename, $(this));
+                                                            });
                                                         })
                                         )
                                 )
@@ -122,26 +124,26 @@
         window.location.assign('http://' + window.location.host + window.location.pathname + '?id=' + id);
     }
 
-    function getLikeList(index, name, btn) {
+    function getLikeList(index, callback) {
         var photo = LastResponse.photos.data[index];
 
         var likeList = photo.likes.data;
         var nextLink = photo.likes.paging.next;
 
-        nestGetList(name, likeList, nextLink, btn);
+        nestGetList(likeList, nextLink, callback);
     }
 
-    function nestGetList(name, likeList, nextLink, btn) {
-        if (nextLink == undefined) {
-            saveText(name, likeList, btn);
+    function nestGetList(likeList, nextLink, callback) {
+        if (nextLink == undefined && callback != undefined) {
+            callback(likeList);
         }
         $.getJSON(nextLink, function (response) {
             likeList.push.apply(likeList, response.data);
-            nestGetList(name, likeList, response.paging.next, btn);
+            nestGetList(likeList, response.paging.next, callback);
         });
     }
 
-    function saveText(name, likeList, btn) {
+    function saveText(likeList, name, btn) {
         var text = [];
         $.each(likeList, function () {
             text = text.concat(this.id + "\t" + this.name + "\r\n");
