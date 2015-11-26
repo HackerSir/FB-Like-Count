@@ -92,7 +92,9 @@
                                         $('<td>').text(count).addClass("text-right"),
                                         $('<td>').addClass('text-center').append(
                                                 $('<a>').addClass("btn btn-primary").text(' 名單').prepend(downloadSpan)
-                                                        .on('click', function() { getLikeList(index, name); })
+                                                        .on('click', function () {
+                                                            getLikeList(index, '[' + $('#time').text() + '][' + ((index < 10) ? '0' : '') + index + ']' + name);
+                                                        })
                                         )
                                 )
                         );
