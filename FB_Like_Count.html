@@ -73,6 +73,7 @@
                     }
 
                     LastResponse = response;
+                    console.log(LastResponse);
 
                     $('#photosName').text(response.name);
                     $('#photosLink').append($('<a>').text(response.link).attr({'href': response.link, 'target': '_blank'}));
