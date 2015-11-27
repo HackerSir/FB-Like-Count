@@ -158,6 +158,11 @@
 
     function getAllLikeList(i, max, text, callback) {
         getLikeList(i, function(likeList) {
+            var $process = $('#allDownload').children(':last');
+            var num = parseInt($process.attr('data-num')) + likeList.length;
+            $process.attr('data-num', num);
+            $process.text(parseInt(num / $process.attr('data-total') * 100) + '%');
+
             var photo = LastResponse.photos.data[i];
 
             text = text.concat('# ' + i + ' ' + photo.name.split("\n")[2] + ' ' + photo.id + '\r\n');
@@ -181,8 +186,18 @@
             var $this = $(this);
 
             $this.append($('<span>').addClass('fa fa-spinner fa-spin'));
+            $this.append($('<span>').text('0%').attr({'data-total': function () {
+                var total = 0;
+                $('#data tr').each(function() {
+                    total += parseInt($(this).children('td:eq(3)').text());
+                });
+                return total;
+            },
+                'data-num': 0
+            }));
 
             getAllLikeList(0, LastResponse.photos.data.length, [], function(text) {
+                $this.children(':last').remove();
                 $this.children(':last').remove();
 
                 var blob = new Blob(text, {type: "text/plain;charset=utf-8"});
