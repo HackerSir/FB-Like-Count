@@ -97,15 +97,18 @@
                                         $('<td>').addClass('text-center').append(
                                                 $('<a>').addClass("btn btn-primary").text(' 名單').prepend($downloadSpan)
                                                         .on('click', function () {
-                                                            $(this).append($loadSpan);
+                                                            var $btn = $(this);
+                                                            $btn.append($loadSpan);
+                                                            $btn.addClass('disabled');
                                                             getLikeList(index, function(likeList) {
-                                                                saveText(likeList, filename, $(this));
+                                                                saveText(likeList, filename, $btn);
                                                             });
                                                         })
                                         )
                                 )
                         );
                     });
+                    $('#allDownload').removeClass('disabled');
                 }
         );
 
@@ -151,6 +154,7 @@
         });
 
         $(btn).children(':last').remove();
+        $(btn).removeClass('disabled');
 
         var blob = new Blob(text, {type: "text/plain;charset=utf-8"});
         saveAs(blob, name + ".txt");
@@ -195,10 +199,12 @@
             },
                 'data-num': 0
             }));
+            $this.addClass('disabled');
 
             getAllLikeList(0, LastResponse.photos.data.length, [], function(text) {
                 $this.children(':last').remove();
                 $this.children(':last').remove();
+                $this.removeClass('disabled');
 
                 var blob = new Blob(text, {type: "text/plain;charset=utf-8"});
                 saveAs(blob, '[' + $('#time').text() + '][ALL]' + $('#photosId').text() + '.txt');
@@ -240,7 +246,7 @@
 
     <div class="row" style="margin-right: 0; margin-left: 0;">
         <div class="pull-right">
-            <a id="allDownload" class="btn btn btn-primary"><span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>&nbsp;全部名單</a>
+            <a id="allDownload" class="btn btn btn-primary disabled"><span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>&nbsp;全部名單</a>
         </div>
         <table class="table">
             <thead>
