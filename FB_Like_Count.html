@@ -65,7 +65,7 @@
         FB.api(
                 '/' + $.urlParam('id'),
                 'GET',
-                {"fields": "photos.limit(100){likes.limit(100).summary(true),name,link},link,name"},
+                {"fields": "photos.limit(100){reactions.limit(100).summary(true),name,link},link,name"},
                 function (response) {
                     if (response.error != undefined) {
                         alert(response.error.message);
@@ -83,7 +83,7 @@
                         var $loadSpan = $('<span>').addClass('fa fa-spinner fa-spin');
 
                         var name = this.name.split("\n")[0];
-                        var count = this.likes.summary.total_count;
+                        var count = this.reactions.summary.total_count;
                         var linkStr = this.link;
                         var filename = '[' + $('#time').text() + '][' + this.id + '][' + ((index < 10) ? '0' : '') + index + ']' + name;
 
@@ -131,8 +131,8 @@
     function getLikeList(index, callback) {
         var photo = LastResponse.photos.data[index];
 
-        var likeList = photo.likes.data;
-        var nextLink = photo.likes.paging.next;
+        var likeList = photo.reactions.data;
+        var nextLink = photo.reactions.paging.next;
 
         nestGetList(likeList, nextLink, callback);
     }
